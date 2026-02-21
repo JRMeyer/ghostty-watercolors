@@ -4,12 +4,14 @@ Watercolor wash backgrounds for [Ghostty](https://ghostty.org) terminal.
 
 ## Preview
 
-| | |
-|---|---|
-| ![Wet-on-Wet](screenshots/wet-on-wet.png) | ![Flat Wash](screenshots/flat-wash.png) |
-| Wet-on-Wet | Flat Wash |
-| ![Variegated Wash](screenshots/variegated-wash.png) | |
-| Variegated Wash | |
+![Wet-on-Wet](screenshots/wet-on-wet.png)
+*Wet-on-Wet*
+
+![Flat Wash](screenshots/flat-wash.png)
+*Flat Wash*
+
+![Variegated Wash](screenshots/variegated-wash.png)
+*Variegated Wash*
 
 ## Shaders
 
