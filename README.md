@@ -8,8 +8,6 @@ Watercolor wash backgrounds for [Ghostty](https://ghostty.org) terminal.
 |---|---|
 | ![Wet-on-Wet](screenshots/wet-on-wet.png) | ![Flat Wash](screenshots/flat-wash.png) |
 | Wet-on-Wet | Flat Wash |
-| ![Glazing](screenshots/glazing.png) | ![Graded Wash](screenshots/graded-wash.png) |
-| Glazing | Graded Wash |
 
 ## Shaders
 
