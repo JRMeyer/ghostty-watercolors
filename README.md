@@ -1,4 +1,4 @@
-# ghostty-shaders
+# ghostty-watercolors
 
 Watercolor wash backgrounds for [Ghostty](https://ghostty.org) terminal.
 
@@ -41,13 +41,13 @@ sed 's/WASH_HUE/0.6/g' flat-wash-bg.glsl > my-shader.glsl
 `randomize-shader.sh` picks a random shader **and** a random color each time it runs, generating `active-shader.glsl`. Add to your `.zshrc`:
 
 ```bash
-source /path/to/ghostty-shaders/randomize-shader.sh
+source /path/to/ghostty-watercolors/randomize-shader.sh
 ```
 
 Then point your Ghostty config to the generated file:
 
 ```
-custom-shader = /path/to/ghostty-shaders/active-shader.glsl
+custom-shader = /path/to/ghostty-watercolors/active-shader.glsl
 ```
 
 Each new terminal window gets a different wash type and color.
