@@ -58,14 +58,15 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
     float inPaint = paintTop * paintBottom * paintLeft * paintRight;
 
-    // --- Graded wash color ---
-    vec3 washColor = vec3(0.20, 0.30, 0.55); // muted blue
+    // --- Graded wash color (random per session) ---
+    // WASH_HUE is replaced by randomize-shader.sh, default 0.6
+    float hue = WASH_HUE;
+    vec3 washColor = 0.3 + 0.2 * cos(6.28318 * (hue + vec3(0.0, 0.33, 0.67)));
 
     // Gradient: full color at top, fading toward bottom
-    // Mostly smooth with subtle unevenness like real watercolor
-    float grad = 1.0 - uv.y; // 1 at top, 0 at bottom
+    float grad = 1.0 - uv.y;
 
-    // Gentle unevenness — slight wobble, not big blobs
+    // Gentle unevenness
     float wobble = fbm(vec2(fragCoord.x * 0.005, fragCoord.y * 0.004));
     grad += (wobble - 0.5) * 0.1;
 

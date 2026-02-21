@@ -61,7 +61,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     float inPaint = paintTop * paintBottom * paintLeft * paintRight;
 
     // --- Flat wash color ---
-    vec3 washColor = vec3(0.28, 0.32, 0.52); // muted indigo
+    // WASH_HUE is replaced by randomize-shader.sh, default 0.6
+    float hue = WASH_HUE;
+    vec3 washColor = 0.3 + 0.2 * cos(6.28318 * (hue + vec3(0.0, 0.33, 0.67)));
 
     // Very subtle pigment settling (keeps it flat but alive)
     float settle = fbm(fragCoord * 0.008);

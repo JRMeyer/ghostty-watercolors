@@ -1,15 +1,29 @@
 #!/bin/bash
-# Randomly pick a watercolor shader and symlink it as the active one.
+# Randomly pick a watercolor shader and color, then generate active-shader.glsl.
 # Add to your .zshrc: source ~/code/ghostty-shaders/randomize-shader.sh
 
 SHADER_DIR="$HOME/code/ghostty-shaders"
-LINK="$SHADER_DIR/active-shader.glsl"
+OUTPUT="$SHADER_DIR/active-shader.glsl"
+TMP="$SHADER_DIR/.active-shader.tmp"
 
+# List shader files explicitly to avoid bash/zsh array differences
 shaders=(
-    "$SHADER_DIR/flat-wash-bg.glsl"
-    "$SHADER_DIR/graded-wash-bg.glsl"
-    "$SHADER_DIR/variegated-wash-bg.glsl"
+    "flat-wash-bg.glsl"
+    "graded-wash-bg.glsl"
+    "variegated-wash-bg.glsl"
 )
 
-picked="${shaders[$((RANDOM % ${#shaders[@]}))]}"
-ln -sf "$picked" "$LINK"
+count=${#shaders[@]}
+index=$((RANDOM % count))
+picked="$SHADER_DIR/${shaders[$index]}"
+
+# Fallback if somehow the file doesn't exist
+if [ ! -f "$picked" ]; then
+    picked="$SHADER_DIR/flat-wash-bg.glsl"
+fi
+
+# Random hue between 0.0 and 1.0
+hue=$(awk "BEGIN {srand(); printf \"%.3f\", rand()}")
+
+# Generate to temp file, then atomic move
+sed "s/WASH_HUE/$hue/g" "$picked" > "$TMP" && mv "$TMP" "$OUTPUT"

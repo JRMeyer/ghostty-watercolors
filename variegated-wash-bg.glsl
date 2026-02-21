@@ -62,8 +62,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     float inPaint = paintTop * paintBottom * paintLeft * paintRight;
 
     // --- Variegated wash: two colors blending top to bottom ---
-    vec3 colorTop = vec3(0.45, 0.28, 0.52);    // warm violet
-    vec3 colorBottom = vec3(0.18, 0.35, 0.55);  // cool blue
+    // WASH_HUE is replaced by randomize-shader.sh, default 0.6
+    float hue1 = WASH_HUE;
+    float hue2 = fract(WASH_HUE + 0.3);
+    vec3 colorTop = 0.3 + 0.2 * cos(6.28318 * (hue1 + vec3(0.0, 0.33, 0.67)));
+    vec3 colorBottom = 0.3 + 0.2 * cos(6.28318 * (hue2 + vec3(0.0, 0.33, 0.67)));
 
     // Blend position: mostly vertical but with organic wobble
     float blend = 1.0 - uv.y; // 1 at top, 0 at bottom
