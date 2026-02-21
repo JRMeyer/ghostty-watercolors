@@ -2,6 +2,15 @@
 
 Watercolor wash backgrounds for [Ghostty](https://ghostty.org) terminal.
 
+## Preview
+
+| | |
+|---|---|
+| ![Wet-on-Wet](screenshots/wet-on-wet.png) | ![Flat Wash](screenshots/flat-wash.png) |
+| Wet-on-Wet | Flat Wash |
+| ![Glazing](screenshots/glazing.png) | ![Graded Wash](screenshots/graded-wash.png) |
+| Glazing | Graded Wash |
+
 ## Shaders
 
 - **flat-wash-bg.glsl** — Uniform color with organic edges.
