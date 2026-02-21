@@ -1,8 +1,8 @@
 #!/bin/bash
 # Randomly pick a watercolor shader and color, then generate active-shader.glsl.
-# Add to your .zshrc: source ~/code/ghostty-shaders/randomize-shader.sh
+# Add to your .zshrc: source ~/code/ghostty-watercolors/randomize-shader.sh
 
-SHADER_DIR="$HOME/code/ghostty-shaders"
+SHADER_DIR="$HOME/code/ghostty-watercolors"
 OUTPUT="$SHADER_DIR/active-shader.glsl"
 TMP="$SHADER_DIR/.active-shader.tmp"
 
