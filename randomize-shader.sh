@@ -11,6 +11,9 @@ shaders=(
     "flat-wash-bg.glsl"
     "graded-wash-bg.glsl"
     "variegated-wash-bg.glsl"
+    "wet-on-wet-bg.glsl"
+    "glazing-bg.glsl"
+    "granulating-bg.glsl"
 )
 
 count=${#shaders[@]}

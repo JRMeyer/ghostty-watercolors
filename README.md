@@ -7,6 +7,9 @@ Watercolor wash backgrounds for [Ghostty](https://ghostty.org) terminal.
 - **flat-wash-bg.glsl** — Uniform color with organic edges.
 - **graded-wash-bg.glsl** — Fades from full color to transparent, top to bottom.
 - **variegated-wash-bg.glsl** — Two colors blending into each other.
+- **wet-on-wet-bg.glsl** — Soft, bleeding color regions like pigment dropped on wet paper.
+- **glazing-bg.glsl** — Multiple transparent color layers stacked with visible overlap.
+- **granulating-bg.glsl** — Pigment settles into paper texture, creating a speckled, grainy look.
 
 ## Usage
 
