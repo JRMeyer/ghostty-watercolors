@@ -24,16 +24,24 @@ window-padding-x = 64
 window-padding-y = 64
 ```
 
+Each shader uses a `WASH_HUE` placeholder for the color. Replace it with a value between `0.0` and `1.0` to pick a hue, e.g.:
+
+```bash
+sed 's/WASH_HUE/0.6/g' flat-wash-bg.glsl > my-shader.glsl
+```
+
 ## Randomize per window
 
-`randomize-shader.sh` picks a random shader each time it runs. Add to your `.zshrc`:
+`randomize-shader.sh` picks a random shader **and** a random color each time it runs, generating `active-shader.glsl`. Add to your `.zshrc`:
 
 ```bash
 source /path/to/ghostty-shaders/randomize-shader.sh
 ```
 
-Then point your Ghostty config to the symlink it creates:
+Then point your Ghostty config to the generated file:
 
 ```
 custom-shader = /path/to/ghostty-shaders/active-shader.glsl
 ```
+
+Each new terminal window gets a different wash type and color.
