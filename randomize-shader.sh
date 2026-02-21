@@ -14,7 +14,6 @@ shaders=(
     "wet-on-wet-bg.glsl"
     "glazing-bg.glsl"
     "granulating-bg.glsl"
-    "dry-brush-bg.glsl"
     "salt-bg.glsl"
     "cauliflower-bg.glsl"
     "splatter-bg.glsl"
