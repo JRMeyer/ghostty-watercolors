@@ -1,6 +1,6 @@
-// Granulating Watercolor Wash Background
-// Pigment settles into paper texture, creating a speckled, grainy look.
-// Dense pigment clusters in paper valleys, bare paper on the peaks.
+// Cauliflower / Bloom Watercolor Wash Background
+// Backruns where wet paint creeps into drying areas.
+// Fractal-edged shapes with dark pigment concentrated at the boundary.
 
 float hash21(vec2 p) {
     p = fract(p * vec2(234.34, 435.345));
@@ -58,41 +58,50 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
     float inPaint = paintTop * paintBottom * paintLeft * paintRight;
 
-    // --- Granulating wash ---
+    // --- Cauliflower blooms: backruns with fractal edges ---
     // WASH_HUE is replaced by randomize-shader.sh, default 0.6
     float hue = WASH_HUE;
     vec3 pigment = 0.3 + 0.2 * cos(6.28318 * (hue + vec3(0.0, 0.33, 0.67)));
 
-    // Paper texture at multiple scales — pigment settles in the valleys
-    // Coarse paper grain (cold-pressed texture)
-    float coarseGrain = vnoise(fragCoord * 0.06);
-    // Medium texture
-    float medGrain = vnoise(fragCoord * 0.12 + vec2(50.0));
-    // Fine tooth
-    float fineGrain = hash21(floor(fragCoord * 0.3));
-
-    // Combined paper surface: 0 = valley (catches pigment), 1 = peak (bare)
-    float paperSurface = coarseGrain * 0.5 + medGrain * 0.3 + fineGrain * 0.2;
-
-    // Pigment density: more pigment in valleys, less on peaks
-    // This creates the characteristic granulation speckle
-    float pigmentDensity = 1.0 - smoothstep(0.25, 0.65, paperSurface);
-
-    // Large-scale wash variation (where more/less paint was applied)
+    // Base wash that was drying when the backruns happened
     vec2 p = fragCoord * 0.001 + vec2(hue * 100.0, hue * 73.0);
-    float washAmount = fbm(p * 1.5 + vec2(5.0, 3.0));
-    pigmentDensity *= smoothstep(0.2, 0.6, washAmount);
+    float baseWash = fbm(p * 1.5 + vec2(2.0, 4.0));
+    vec3 washColor = mix(iBackgroundColor, pigment, smoothstep(0.25, 0.55, baseWash) * 0.5);
 
-    // Color: dense areas are saturated pigment, sparse areas show paper
-    vec3 washColor = mix(iBackgroundColor, pigment, pigmentDensity * 0.7);
+    // Bloom 1: heavily domain-warped noise creates fractal cauliflower edges
+    vec2 q1 = vec2(fbm(p * 3.0 + vec2(1.7, 9.2)), fbm(p * 3.0 + vec2(8.3, 2.8)));
+    vec2 r1 = vec2(fbm(p * 3.0 + 4.0 * q1 + vec2(1.0, 6.0)),
+                   fbm(p * 3.0 + 4.0 * q1 + vec2(5.0, 3.0)));
+    float bloom1 = fbm(p * 3.0 + 4.0 * r1);
 
-    // Slight color separation — granulating pigments often split into
-    // warm and cool components as they settle
-    float separation = vnoise(fragCoord * 0.08 + vec2(30.0));
-    vec3 warmPigment = pigment * vec3(1.15, 1.0, 0.85);
-    vec3 coolPigment = pigment * vec3(0.85, 1.0, 1.15);
-    vec3 splitColor = mix(warmPigment, coolPigment, separation);
-    washColor = mix(washColor, mix(iBackgroundColor, splitColor, pigmentDensity * 0.7), 0.3);
+    // Bloom 2: second backrun at a different position
+    vec2 q2 = vec2(fbm(p * 2.5 + vec2(5.0, 3.0)), fbm(p * 2.5 + vec2(2.0, 8.0)));
+    float bloom2 = fbm(p * 2.5 + 3.5 * q2 + vec2(10.0));
+
+    // Sharp edges with pigment concentration — the cauliflower signature
+    float inside1 = smoothstep(0.46, 0.52, bloom1);
+    float edgeLine1 = smoothstep(0.44, 0.48, bloom1) * (1.0 - smoothstep(0.50, 0.56, bloom1));
+
+    float inside2 = smoothstep(0.48, 0.54, bloom2);
+    float edgeLine2 = smoothstep(0.46, 0.50, bloom2) * (1.0 - smoothstep(0.52, 0.58, bloom2));
+
+    // Inside the bloom: lighter (water pushed pigment outward to the edges)
+    washColor = mix(washColor, washColor * 1.3, inside1 * 0.3);
+    washColor = mix(washColor, washColor * 1.25, inside2 * 0.25);
+
+    // Edge lines: darker concentrated pigment where the backrun stopped
+    vec3 darkPigment = pigment * 0.5;
+    washColor = mix(washColor, darkPigment, edgeLine1 * 0.5);
+    washColor = mix(washColor, darkPigment, edgeLine2 * 0.4);
+
+    washColor = clamp(washColor, 0.0, 1.0);
+
+    // Very subtle pigment settling
+    float settle = fbm(fragCoord * 0.008);
+    washColor *= 0.95 + 0.1 * settle;
+
+    // Minimal paper grain
+    washColor *= 0.97 + 0.06 * vnoise(fragCoord * 0.04);
 
     // --- Composite ---
     vec3 result = orig.rgb;

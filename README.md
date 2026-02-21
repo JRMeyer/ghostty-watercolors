@@ -10,6 +10,10 @@ Watercolor wash backgrounds for [Ghostty](https://ghostty.org) terminal.
 - **wet-on-wet-bg.glsl** — Soft, bleeding color regions like pigment dropped on wet paper.
 - **glazing-bg.glsl** — Multiple transparent color layers stacked with visible overlap.
 - **granulating-bg.glsl** — Pigment settles into paper texture, creating a speckled, grainy look.
+- **dry-brush-bg.glsl** — Paint drags across textured paper, catching on raised fibers with gaps.
+- **salt-bg.glsl** — Salt crystal starburst patterns on a wash, with light centers and dark edges.
+- **cauliflower-bg.glsl** — Backruns with fractal edges where wet paint crept into drying areas.
+- **splatter-bg.glsl** — Random droplets scattered across a light wash, like flicking a loaded brush.
 
 ## Usage
 

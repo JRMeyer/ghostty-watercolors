@@ -1,6 +1,6 @@
-// Granulating Watercolor Wash Background
-// Pigment settles into paper texture, creating a speckled, grainy look.
-// Dense pigment clusters in paper valleys, bare paper on the peaks.
+// Dry Brush Watercolor Wash Background
+// Paint dragged across textured paper, catching on raised fibers.
+// Scratchy, energetic streaks with bare paper showing through gaps.
 
 float hash21(vec2 p) {
     p = fract(p * vec2(234.34, 435.345));
@@ -58,41 +58,37 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
     float inPaint = paintTop * paintBottom * paintLeft * paintRight;
 
-    // --- Granulating wash ---
+    // --- Dry brush: paint catches on raised paper fibers ---
     // WASH_HUE is replaced by randomize-shader.sh, default 0.6
     float hue = WASH_HUE;
     vec3 pigment = 0.3 + 0.2 * cos(6.28318 * (hue + vec3(0.0, 0.33, 0.67)));
 
-    // Paper texture at multiple scales — pigment settles in the valleys
-    // Coarse paper grain (cold-pressed texture)
-    float coarseGrain = vnoise(fragCoord * 0.06);
-    // Medium texture
-    float medGrain = vnoise(fragCoord * 0.12 + vec2(50.0));
-    // Fine tooth
-    float fineGrain = hash21(floor(fragCoord * 0.3));
+    // Paper texture stretched horizontally — brush dragged sideways
+    float coarseFiber = vnoise(vec2(fragCoord.x * 0.015, fragCoord.y * 0.06));
+    float medFiber = vnoise(vec2(fragCoord.x * 0.03, fragCoord.y * 0.12));
+    float fineFiber = hash21(floor(fragCoord * vec2(0.2, 0.5)));
 
-    // Combined paper surface: 0 = valley (catches pigment), 1 = peak (bare)
-    float paperSurface = coarseGrain * 0.5 + medGrain * 0.3 + fineGrain * 0.2;
+    // Combined paper surface: high = raised fiber (catches paint)
+    float paperHeight = coarseFiber * 0.5 + medFiber * 0.3 + fineFiber * 0.2;
 
-    // Pigment density: more pigment in valleys, less on peaks
-    // This creates the characteristic granulation speckle
-    float pigmentDensity = 1.0 - smoothstep(0.25, 0.65, paperSurface);
+    // Paint only sticks to raised areas — aggressive threshold for lots of gaps
+    float paintStick = smoothstep(0.28, 0.45, paperHeight);
 
-    // Large-scale wash variation (where more/less paint was applied)
+    // Brush load varies across surface — some areas got more paint
     vec2 p = fragCoord * 0.001 + vec2(hue * 100.0, hue * 73.0);
-    float washAmount = fbm(p * 1.5 + vec2(5.0, 3.0));
-    pigmentDensity *= smoothstep(0.2, 0.6, washAmount);
+    float brushLoad = fbm(p * 1.5 + vec2(3.0, 7.0));
+    paintStick *= smoothstep(0.2, 0.5, brushLoad);
 
-    // Color: dense areas are saturated pigment, sparse areas show paper
-    vec3 washColor = mix(iBackgroundColor, pigment, pigmentDensity * 0.7);
+    // Horizontal streak emphasis — the directional signature of dry brush
+    float streak = vnoise(vec2(fragCoord.x * 0.004, fragCoord.y * 0.04));
+    paintStick *= smoothstep(0.15, 0.45, streak);
 
-    // Slight color separation — granulating pigments often split into
-    // warm and cool components as they settle
-    float separation = vnoise(fragCoord * 0.08 + vec2(30.0));
-    vec3 warmPigment = pigment * vec3(1.15, 1.0, 0.85);
-    vec3 coolPigment = pigment * vec3(0.85, 1.0, 1.15);
-    vec3 splitColor = mix(warmPigment, coolPigment, separation);
-    washColor = mix(washColor, mix(iBackgroundColor, splitColor, pigmentDensity * 0.7), 0.3);
+    // Where paint sticks: pigment. Where it skips: bare paper.
+    vec3 washColor = mix(iBackgroundColor, pigment, paintStick * 0.75);
+
+    // Slight color variation along brush direction
+    float colorVar = vnoise(vec2(fragCoord.x * 0.003, 0.0));
+    washColor = mix(washColor, washColor * (0.9 + 0.2 * colorVar), paintStick);
 
     // --- Composite ---
     vec3 result = orig.rgb;

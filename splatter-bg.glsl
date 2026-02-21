@@ -1,6 +1,6 @@
-// Glazing Watercolor Wash Background
-// Multiple transparent color layers stacked on each other.
-// Each layer is visible through the ones above, creating depth.
+// Splatter Watercolor Wash Background
+// Random droplets scattered across a light wash, like flicking a loaded brush.
+// Multiple sizes from large drops to fine spray.
 
 float hash21(vec2 p) {
     p = fract(p * vec2(234.34, 435.345));
@@ -23,6 +23,32 @@ float fbm(vec2 p) {
     float s = 0.0, a = 0.5;
     for (int i = 0; i < 5; i++) { s += vnoise(p) * a; p *= 2.0; a *= 0.5; }
     return s;
+}
+
+// Compute splatter droplets at a given grid scale
+// cellSize: pixel size of each grid cell
+// density: 0-1, chance a cell has a drop
+// maxRadius: max drop radius in cell-fraction units
+float splatDrops(vec2 fragCoord, float cellSize, float density, float maxRadius) {
+    vec2 grid = fragCoord / cellSize;
+    vec2 cell = floor(grid);
+    vec2 local = fract(grid);
+
+    float drop = 0.0;
+    for (int y = -1; y <= 1; y++) {
+        for (int x = -1; x <= 1; x++) {
+            vec2 neighbor = cell + vec2(float(x), float(y));
+            float exists = step(1.0 - density, hash21(neighbor + vec2(31.0)));
+            vec2 dropPos = vec2(hash21(neighbor), hash21(neighbor + vec2(7.0)));
+            float dropRadius = hash21(neighbor + vec2(13.0)) * maxRadius + maxRadius * 0.3;
+            // Slight per-drop shape variation
+            float wobble = 0.9 + 0.2 * hash21(neighbor + vec2(53.0));
+            vec2 diff = vec2(float(x), float(y)) + dropPos - local;
+            float d = length(diff);
+            drop += exists * (1.0 - smoothstep(dropRadius * 0.7 * wobble, dropRadius * wobble, d));
+        }
+    }
+    return clamp(drop, 0.0, 1.0);
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
@@ -58,44 +84,33 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
     float inPaint = paintTop * paintBottom * paintLeft * paintRight;
 
-    // --- Glazing: transparent layers stacked with visible overlap ---
+    // --- Splatter: droplets on a light wash ---
     // WASH_HUE is replaced by randomize-shader.sh, default 0.6
     float hue = WASH_HUE;
+    vec3 pigment = 0.3 + 0.2 * cos(6.28318 * (hue + vec3(0.0, 0.33, 0.67)));
 
-    // Three glaze colors — related hues at different saturations
-    vec3 glaze1 = 0.3 + 0.2 * cos(6.28318 * (hue + vec3(0.0, 0.33, 0.67)));
-    vec3 glaze2 = 0.3 + 0.2 * cos(6.28318 * (hue + 0.12 + vec3(0.0, 0.33, 0.67)));
-    vec3 glaze3 = 0.3 + 0.2 * cos(6.28318 * (hue + 0.28 + vec3(0.0, 0.33, 0.67)));
-
+    // Light base wash underneath the splatter
     vec2 p = fragCoord * 0.001 + vec2(hue * 100.0, hue * 73.0);
+    float baseWash = fbm(p * 1.5 + vec2(5.0, 3.0));
+    vec3 washColor = mix(iBackgroundColor, pigment, smoothstep(0.3, 0.6, baseWash) * 0.25);
 
-    // Each glaze layer has a distinct shape with crisp-ish edges
-    // (dried before the next layer was applied)
-    float layer1 = fbm(p * 1.5 + vec2(3.0, 1.0));
-    float layer2 = fbm(p * 1.3 + vec2(8.0, 5.0));
-    float layer3 = fbm(p * 1.1 + vec2(15.0, 9.0));
+    // Splatter at three scales: large drops, medium drops, fine spray
+    float largeDrop = splatDrops(fragCoord, 80.0, 0.25, 0.25);
+    float medDrop   = splatDrops(fragCoord, 40.0, 0.2, 0.22);
+    float fineSpray = splatDrops(fragCoord, 18.0, 0.15, 0.18);
 
-    // Sharper masks than wet-on-wet — each layer dried before the next
-    float m1 = smoothstep(0.38, 0.48, layer1);
-    float m2 = smoothstep(0.40, 0.50, layer2);
-    float m3 = smoothstep(0.42, 0.52, layer3);
+    // Combine all drop layers
+    float allDrops = clamp(largeDrop + medDrop * 0.8 + fineSpray * 0.5, 0.0, 1.0);
 
-    // Stack glazes: each layer is semi-transparent over what's below
-    // Start with paper
-    vec3 washColor = iBackgroundColor;
+    // Drops are pigmented; larger drops are slightly darker (more paint)
+    vec3 dropColor = pigment * (0.85 + 0.15 * largeDrop);
 
-    // Layer 1 (bottom, most visible)
-    washColor = mix(washColor, glaze1, m1 * 0.4);
+    // Drops darken slightly at edges (pigment settles to rim)
+    float edgeDarken = largeDrop * (1.0 - smoothstep(0.0, 0.8, largeDrop)) * 0.15;
+    dropColor *= 1.0 - edgeDarken;
 
-    // Layer 2 (middle)
-    washColor = mix(washColor, glaze2, m2 * 0.35);
-
-    // Layer 3 (top, most transparent)
-    washColor = mix(washColor, glaze3, m3 * 0.3);
-
-    // Where layers overlap, colors mix and deepen
-    float overlap = m1 * m2 + m2 * m3 + m1 * m3;
-    washColor = mix(washColor, washColor * 0.7, overlap * 0.2);
+    // Mix drops onto the base wash
+    washColor = mix(washColor, dropColor, allDrops * 0.7);
 
     // Very subtle pigment settling
     float settle = fbm(fragCoord * 0.008);

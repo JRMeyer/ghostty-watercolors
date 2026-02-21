@@ -67,7 +67,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec3 pigment2 = 0.35 + 0.2 * cos(6.28318 * (hue + 0.15 + vec3(0.0, 0.33, 0.67)));
     vec3 pigment3 = 0.35 + 0.2 * cos(6.28318 * (hue + 0.4 + vec3(0.0, 0.33, 0.67)));
 
-    vec2 p = fragCoord * 0.001;
+    vec2 p = fragCoord * 0.001 + vec2(hue * 100.0, hue * 73.0);
 
     // Domain-warped noise for soft, flowing bleed shapes
     vec2 q1 = vec2(fbm(p * 1.2), fbm(p * 1.2 + vec2(5.2, 1.3)));
