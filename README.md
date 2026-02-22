@@ -13,6 +13,9 @@ Watercolor wash backgrounds for [Ghostty](https://ghostty.org) terminal.
 ![Variegated Wash](screenshots/variegated-wash.png)
 *Variegated Wash*
 
+![Salt](screenshots/salt.png)
+*Salt*
+
 ## Shaders
 
 - **flat-wash-bg.glsl** — Uniform color with organic edges.
